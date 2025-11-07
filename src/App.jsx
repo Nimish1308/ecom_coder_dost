@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 
 import { createBrowserRouter, RouterProvider, Route, Link } from 'react-router'
+import CartPage from './pages/CartPage'
 
 const router = createBrowserRouter([
   {
@@ -30,8 +31,12 @@ const router = createBrowserRouter([
     )
   },
 
-  
-
+   {
+    path: '/cart',
+    element: (
+      <CartPage />
+    )
+  },
 
 ])
 function App() {
