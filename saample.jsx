@@ -1,1881 +1,29 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchAllProductsAsync, selectAllProducts } from '../productListSlice'
+import React, { useState, Fragment, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { Dialog, Disclosure, Menu, MenuItems, Transition } from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon, ChevronLeftIcon, ChevronRightIcon, StarIcon } from '@heroicons/react/20/solid'
-import { Link } from 'react-router'
-
-//Dummy Data
-
-
-//Product Dummy
-// const oldproducts = [
-//   {
-//     id: 1,
-//     name: 'Basic Tee',
-//     href: '#',
-//     thumbnail: 'https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-01.jpg',
-//     title: "Front of men's Basic Tee in black.",
-//     price: '$35',
-//     color: 'Black',
-//   },
-//   {
-//     id: 2,
-//     name: 'Basic Tee',
-//     href: '#',
-//     thumbnail: 'https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-02.jpg',
-//     title: "Front of men's Basic Tee in white.",
-//     price: '$35',
-//     color: 'Aspen White',
-//   },
-//   {
-//     id: 3,
-//     name: 'Basic Tee',
-//     href: '#',
-//     thumbnail: 'https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-03.jpg',
-//     title: "Front of men's Basic Tee in dark gray.",
-//     price: '$35',
-//     color: 'Charcoal',
-//   },
-//   {
-//     id: 4,
-//     name: 'Artwork Tee',
-//     href: '#',
-//     thumbnail: 'https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-04.jpg',
-//     title: "Front of men's Artwork Tee in peach with white and brown dots forming an isometric cube.",
-//     price: '$35',
-//     color: 'Iso Dots',
-//   },
-// ]
-
-// const product = [
-//   {
-//     "id": 1,
-//     "title": "Essence Mascara Lash Princess",
-//     "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
-//     "category": "beauty",
-//     "price": 9.99,
-//     "discountPercentage": 10.48,
-//     "rating": 2.56,
-//     "stock": 99,
-//     "tags": [
-//       "beauty",
-//       "mascara"
-//     ],
-//     "brand": "Essence",
-//     "sku": "BEA-ESS-ESS-001",
-//     "weight": 4,
-//     "dimensions": {
-//       "width": 15.14,
-//       "height": 13.08,
-//       "depth": 22.99
-//     },
-//     "warrantyInformation": "1 week warranty",
-//     "shippingInformation": "Ships in 3-5 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 3,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Eleanor Collins",
-//         "reviewerEmail": "eleanor.collins@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Very satisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Lucas Gordon",
-//         "reviewerEmail": "lucas.gordon@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Eleanor Collins",
-//         "reviewerEmail": "eleanor.collins@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 48,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "5784719087687",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp"
-//   },
-//   {
-//     "id": 2,
-//     "title": "Eyeshadow Palette with Mirror",
-//     "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
-//     "category": "beauty",
-//     "price": 19.99,
-//     "discountPercentage": 18.19,
-//     "rating": 2.86,
-//     "stock": 34,
-//     "tags": [
-//       "beauty",
-//       "eyeshadow"
-//     ],
-//     "brand": "Glamour Beauty",
-//     "sku": "BEA-GLA-EYE-002",
-//     "weight": 9,
-//     "dimensions": {
-//       "width": 9.26,
-//       "height": 22.47,
-//       "depth": 27.67
-//     },
-//     "warrantyInformation": "1 year warranty",
-//     "shippingInformation": "Ships in 2 weeks",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Savannah Gomez",
-//         "reviewerEmail": "savannah.gomez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Awesome product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Christian Perez",
-//         "reviewerEmail": "christian.perez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nicholas Bailey",
-//         "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 20,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "9170275171413",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp"
-//   },
-//   {
-//     "id": 3,
-//     "title": "Powder Canister",
-//     "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
-//     "category": "beauty",
-//     "price": 14.99,
-//     "discountPercentage": 9.84,
-//     "rating": 4.64,
-//     "stock": 89,
-//     "tags": [
-//       "beauty",
-//       "face powder"
-//     ],
-//     "brand": "Velvet Touch",
-//     "sku": "BEA-VEL-POW-003",
-//     "weight": 8,
-//     "dimensions": {
-//       "width": 29.27,
-//       "height": 27.93,
-//       "depth": 20.59
-//     },
-//     "warrantyInformation": "3 months warranty",
-//     "shippingInformation": "Ships in 1-2 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Alexander Jones",
-//         "reviewerEmail": "alexander.jones@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Elijah Cruz",
-//         "reviewerEmail": "elijah.cruz@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Very dissatisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Avery Perez",
-//         "reviewerEmail": "avery.perez@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 22,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "8418883906837",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp"
-//   },
-//   {
-//     "id": 4,
-//     "title": "Red Lipstick",
-//     "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
-//     "category": "beauty",
-//     "price": 12.99,
-//     "discountPercentage": 12.16,
-//     "rating": 4.36,
-//     "stock": 91,
-//     "tags": [
-//       "beauty",
-//       "lipstick"
-//     ],
-//     "brand": "Chic Cosmetics",
-//     "sku": "BEA-CHI-LIP-004",
-//     "weight": 1,
-//     "dimensions": {
-//       "width": 18.11,
-//       "height": 28.38,
-//       "depth": 22.17
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Liam Garcia",
-//         "reviewerEmail": "liam.garcia@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Ruby Andrews",
-//         "reviewerEmail": "ruby.andrews@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Clara Berry",
-//         "reviewerEmail": "clara.berry@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 40,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "9467746727219",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp"
-//   },
-//   {
-//     "id": 5,
-//     "title": "Red Nail Polish",
-//     "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
-//     "category": "beauty",
-//     "price": 8.99,
-//     "discountPercentage": 11.44,
-//     "rating": 4.32,
-//     "stock": 79,
-//     "tags": [
-//       "beauty",
-//       "nail polish"
-//     ],
-//     "brand": "Nail Couture",
-//     "sku": "BEA-NAI-NAI-005",
-//     "weight": 8,
-//     "dimensions": {
-//       "width": 21.63,
-//       "height": 16.48,
-//       "depth": 29.84
-//     },
-//     "warrantyInformation": "1 month warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 2,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Benjamin Wilson",
-//         "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Liam Smith",
-//         "reviewerEmail": "liam.smith@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Very unhappy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Clara Berry",
-//         "reviewerEmail": "clara.berry@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 22,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "4063010628104",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp"
-//   },
-//   {
-//     "id": 6,
-//     "title": "Calvin Klein CK One",
-//     "description": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
-//     "category": "fragrances",
-//     "price": 49.99,
-//     "discountPercentage": 1.89,
-//     "rating": 4.37,
-//     "stock": 29,
-//     "tags": [
-//       "fragrances",
-//       "perfumes"
-//     ],
-//     "brand": "Calvin Klein",
-//     "sku": "FRA-CAL-CAL-006",
-//     "weight": 7,
-//     "dimensions": {
-//       "width": 29.36,
-//       "height": 27.76,
-//       "depth": 20.72
-//     },
-//     "warrantyInformation": "1 week warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 2,
-//         "comment": "Very disappointed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Layla Young",
-//         "reviewerEmail": "layla.young@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Fast shipping!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Daniel Cook",
-//         "reviewerEmail": "daniel.cook@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Not as described!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Jacob Cooper",
-//         "reviewerEmail": "jacob.cooper@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "90 days return policy",
-//     "minimumOrderQuantity": 9,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "2451534060749",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/2.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp"
-//   },
-//   {
-//     "id": 7,
-//     "title": "Chanel Coco Noir Eau De",
-//     "description": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
-//     "category": "fragrances",
-//     "price": 129.99,
-//     "discountPercentage": 16.51,
-//     "rating": 4.26,
-//     "stock": 58,
-//     "tags": [
-//       "fragrances",
-//       "perfumes"
-//     ],
-//     "brand": "Chanel",
-//     "sku": "FRA-CHA-CHA-007",
-//     "weight": 7,
-//     "dimensions": {
-//       "width": 24.5,
-//       "height": 25.7,
-//       "depth": 25.98
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Ruby Andrews",
-//         "reviewerEmail": "ruby.andrews@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Awesome product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Leah Henderson",
-//         "reviewerEmail": "leah.henderson@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Very happy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Xavier Wright",
-//         "reviewerEmail": "xavier.wright@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 1,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "4091737746820",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/2.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/thumbnail.webp"
-//   },
-//   {
-//     "id": 8,
-//     "title": "Dior J'adore",
-//     "description": "J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",
-//     "category": "fragrances",
-//     "price": 89.99,
-//     "discountPercentage": 14.72,
-//     "rating": 3.8,
-//     "stock": 98,
-//     "tags": [
-//       "fragrances",
-//       "perfumes"
-//     ],
-//     "brand": "Dior",
-//     "sku": "FRA-DIO-DIO-008",
-//     "weight": 4,
-//     "dimensions": {
-//       "width": 27.67,
-//       "height": 28.28,
-//       "depth": 11.83
-//     },
-//     "warrantyInformation": "1 week warranty",
-//     "shippingInformation": "Ships in 2 weeks",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Great value for money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nicholas Bailey",
-//         "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Great value for money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Penelope Harper",
-//         "reviewerEmail": "penelope.harper@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Emma Miller",
-//         "reviewerEmail": "emma.miller@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 10,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "1445086097250",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/1.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/2.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/thumbnail.webp"
-//   },
-//   {
-//     "id": 9,
-//     "title": "Dolce Shine Eau de",
-//     "description": "Dolce Shine by Dolce & Gabbana is a vibrant and fruity fragrance, featuring notes of mango, jasmine, and blonde woods. It's a joyful and youthful scent.",
-//     "category": "fragrances",
-//     "price": 69.99,
-//     "discountPercentage": 0.62,
-//     "rating": 3.96,
-//     "stock": 4,
-//     "tags": [
-//       "fragrances",
-//       "perfumes"
-//     ],
-//     "brand": "Dolce & Gabbana",
-//     "sku": "FRA-DOL-DOL-009",
-//     "weight": 6,
-//     "dimensions": {
-//       "width": 27.28,
-//       "height": 29.88,
-//       "depth": 18.3
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships in 1 month",
-//     "availabilityStatus": "Low Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Mateo Bennett",
-//         "reviewerEmail": "mateo.bennett@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly recommended!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nolan Gonzalez",
-//         "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Very happy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Aurora Lawson",
-//         "reviewerEmail": "aurora.lawson@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 2,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "3023868210708",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/2.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/thumbnail.webp"
-//   },
-//   {
-//     "id": 10,
-//     "title": "Gucci Bloom Eau de",
-//     "description": "Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",
-//     "category": "fragrances",
-//     "price": 79.99,
-//     "discountPercentage": 14.39,
-//     "rating": 2.74,
-//     "stock": 91,
-//     "tags": [
-//       "fragrances",
-//       "perfumes"
-//     ],
-//     "brand": "Gucci",
-//     "sku": "FRA-GUC-GUC-010",
-//     "weight": 7,
-//     "dimensions": {
-//       "width": 20.92,
-//       "height": 21.68,
-//       "depth": 11.2
-//     },
-//     "warrantyInformation": "6 months warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 1,
-//         "comment": "Very dissatisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Cameron Perez",
-//         "reviewerEmail": "cameron.perez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Very happy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Daniel Cook",
-//         "reviewerEmail": "daniel.cook@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Addison Wright",
-//         "reviewerEmail": "addison.wright@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 2,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "3170832177880",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/2.webp",
-//       "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/thumbnail.webp"
-//   },
-//   {
-//     "id": 11,
-//     "title": "Annibale Colombo Bed",
-//     "description": "The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",
-//     "category": "furniture",
-//     "price": 1899.99,
-//     "discountPercentage": 8.57,
-//     "rating": 4.77,
-//     "stock": 88,
-//     "tags": [
-//       "furniture",
-//       "beds"
-//     ],
-//     "brand": "Annibale Colombo",
-//     "sku": "FUR-ANN-ANN-011",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 28.16,
-//       "height": 25.36,
-//       "depth": 17.28
-//     },
-//     "warrantyInformation": "1 year warranty",
-//     "shippingInformation": "Ships in 1 month",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 2,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Christopher West",
-//         "reviewerEmail": "christopher.west@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Vivian Carter",
-//         "reviewerEmail": "vivian.carter@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Mason Wright",
-//         "reviewerEmail": "mason.wright@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 1,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "3610757456581",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/2.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp"
-//   },
-//   {
-//     "id": 12,
-//     "title": "Annibale Colombo Sofa",
-//     "description": "The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",
-//     "category": "furniture",
-//     "price": 2499.99,
-//     "discountPercentage": 14.4,
-//     "rating": 3.92,
-//     "stock": 60,
-//     "tags": [
-//       "furniture",
-//       "sofas"
-//     ],
-//     "brand": "Annibale Colombo",
-//     "sku": "FUR-ANN-ANN-012",
-//     "weight": 6,
-//     "dimensions": {
-//       "width": 12.75,
-//       "height": 20.55,
-//       "depth": 19.06
-//     },
-//     "warrantyInformation": "Lifetime warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 3,
-//         "comment": "Very unhappy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Christian Perez",
-//         "reviewerEmail": "christian.perez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Fast shipping!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Lillian Bishop",
-//         "reviewerEmail": "lillian.bishop@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Lillian Simmons",
-//         "reviewerEmail": "lillian.simmons@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 1,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "1777662847736",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/2.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/thumbnail.webp"
-//   },
-//   {
-//     "id": 13,
-//     "title": "Bedside Table African Cherry",
-//     "description": "The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",
-//     "category": "furniture",
-//     "price": 299.99,
-//     "discountPercentage": 19.09,
-//     "rating": 2.87,
-//     "stock": 64,
-//     "tags": [
-//       "furniture",
-//       "bedside tables"
-//     ],
-//     "brand": "Furniture Co.",
-//     "sku": "FUR-FUR-BED-013",
-//     "weight": 2,
-//     "dimensions": {
-//       "width": 13.47,
-//       "height": 24.99,
-//       "depth": 27.35
-//     },
-//     "warrantyInformation": "5 year warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Aaliyah Hanson",
-//         "reviewerEmail": "aaliyah.hanson@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Liam Smith",
-//         "reviewerEmail": "liam.smith@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly recommended!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Avery Barnes",
-//         "reviewerEmail": "avery.barnes@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 3,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "6441287925979",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/2.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/thumbnail.webp"
-//   },
-//   {
-//     "id": 14,
-//     "title": "Knoll Saarinen Executive Conference Chair",
-//     "description": "The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",
-//     "category": "furniture",
-//     "price": 499.99,
-//     "discountPercentage": 2.01,
-//     "rating": 4.88,
-//     "stock": 26,
-//     "tags": [
-//       "furniture",
-//       "office chairs"
-//     ],
-//     "brand": "Knoll",
-//     "sku": "FUR-KNO-KNO-014",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 13.81,
-//       "height": 7.5,
-//       "depth": 5.62
-//     },
-//     "warrantyInformation": "2 year warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 2,
-//         "comment": "Waste of money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Ella Cook",
-//         "reviewerEmail": "ella.cook@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Very dissatisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Clara Berry",
-//         "reviewerEmail": "clara.berry@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Elena Long",
-//         "reviewerEmail": "elena.long@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "60 days return policy",
-//     "minimumOrderQuantity": 5,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "8919386859966",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/2.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/thumbnail.webp"
-//   },
-//   {
-//     "id": 15,
-//     "title": "Wooden Bathroom Sink With Mirror",
-//     "description": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
-//     "category": "furniture",
-//     "price": 799.99,
-//     "discountPercentage": 8.8,
-//     "rating": 3.59,
-//     "stock": 7,
-//     "tags": [
-//       "furniture",
-//       "bathroom"
-//     ],
-//     "brand": "Bath Trends",
-//     "sku": "FUR-BAT-WOO-015",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 7.98,
-//       "height": 8.88,
-//       "depth": 28.46
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships in 3-5 business days",
-//     "availabilityStatus": "Low Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Fast shipping!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Logan Torres",
-//         "reviewerEmail": "logan.torres@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Very pleased!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Aria Parker",
-//         "reviewerEmail": "aria.parker@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Dylan Wells",
-//         "reviewerEmail": "dylan.wells@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "60 days return policy",
-//     "minimumOrderQuantity": 2,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "1958104402873",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/2.webp",
-//       "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/3.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp"
-//   },
-//   {
-//     "id": 16,
-//     "title": "Apple",
-//     "description": "Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",
-//     "category": "groceries",
-//     "price": 1.99,
-//     "discountPercentage": 12.62,
-//     "rating": 4.19,
-//     "stock": 8,
-//     "tags": [
-//       "fruits"
-//     ],
-//     "sku": "GRO-BRD-APP-016",
-//     "weight": 9,
-//     "dimensions": {
-//       "width": 13.66,
-//       "height": 11.01,
-//       "depth": 9.73
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships in 2 weeks",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Very satisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Sophia Brown",
-//         "reviewerEmail": "sophia.brown@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Very dissatisfied!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Scarlett Bowman",
-//         "reviewerEmail": "scarlett.bowman@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Very unhappy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "William Gonzalez",
-//         "reviewerEmail": "william.gonzalez@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "90 days return policy",
-//     "minimumOrderQuantity": 7,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "7962803553314",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/apple/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/apple/thumbnail.webp"
-//   },
-//   {
-//     "id": 17,
-//     "title": "Beef Steak",
-//     "description": "High-quality beef steak, great for grilling or cooking to your preferred level of doneness.",
-//     "category": "groceries",
-//     "price": 12.99,
-//     "discountPercentage": 9.61,
-//     "rating": 4.47,
-//     "stock": 86,
-//     "tags": [
-//       "meat"
-//     ],
-//     "sku": "GRO-BRD-BEE-017",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 18.9,
-//       "height": 5.77,
-//       "depth": 18.57
-//     },
-//     "warrantyInformation": "3 year warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 3,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Eleanor Tyler",
-//         "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Fast shipping!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Alexander Jones",
-//         "reviewerEmail": "alexander.jones@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Great value for money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Natalie Harris",
-//         "reviewerEmail": "natalie.harris@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "60 days return policy",
-//     "minimumOrderQuantity": 43,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "5640063409695",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/beef-steak/thumbnail.webp"
-//   },
-//   {
-//     "id": 18,
-//     "title": "Cat Food",
-//     "description": "Nutritious cat food formulated to meet the dietary needs of your feline friend.",
-//     "category": "groceries",
-//     "price": 8.99,
-//     "discountPercentage": 9.58,
-//     "rating": 3.13,
-//     "stock": 46,
-//     "tags": [
-//       "pet supplies",
-//       "cat food"
-//     ],
-//     "sku": "GRO-BRD-FOO-018",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 18.08,
-//       "height": 9.26,
-//       "depth": 21.86
-//     },
-//     "warrantyInformation": "1 year warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 3,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Noah Lewis",
-//         "reviewerEmail": "noah.lewis@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Very unhappy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Ruby Andrews",
-//         "reviewerEmail": "ruby.andrews@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Very disappointed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Ethan Thompson",
-//         "reviewerEmail": "ethan.thompson@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 18,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "1483991328610",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cat-food/thumbnail.webp"
-//   },
-//   {
-//     "id": 19,
-//     "title": "Chicken Meat",
-//     "description": "Fresh and tender chicken meat, suitable for various culinary preparations.",
-//     "category": "groceries",
-//     "price": 9.99,
-//     "discountPercentage": 13.7,
-//     "rating": 3.19,
-//     "stock": 97,
-//     "tags": [
-//       "meat"
-//     ],
-//     "sku": "GRO-BRD-CHI-019",
-//     "weight": 1,
-//     "dimensions": {
-//       "width": 11.03,
-//       "height": 22.11,
-//       "depth": 16.01
-//     },
-//     "warrantyInformation": "1 year warranty",
-//     "shippingInformation": "Ships in 1 month",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Mateo Bennett",
-//         "reviewerEmail": "mateo.bennett@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly recommended!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Jackson Evans",
-//         "reviewerEmail": "jackson.evans@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Not worth the price!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Sadie Morales",
-//         "reviewerEmail": "sadie.morales@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 22,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "8829514594521",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp",
-//       "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/2.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/thumbnail.webp"
-//   },
-//   {
-//     "id": 20,
-//     "title": "Cooking Oil",
-//     "description": "Versatile cooking oil suitable for frying, sautéing, and various culinary applications.",
-//     "category": "groceries",
-//     "price": 4.99,
-//     "discountPercentage": 9.33,
-//     "rating": 4.8,
-//     "stock": 10,
-//     "tags": [
-//       "cooking essentials"
-//     ],
-//     "sku": "GRO-BRD-COO-020",
-//     "weight": 5,
-//     "dimensions": {
-//       "width": 19.95,
-//       "height": 27.54,
-//       "depth": 24.86
-//     },
-//     "warrantyInformation": "Lifetime warranty",
-//     "shippingInformation": "Ships in 1-2 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Very happy with my purchase!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Victoria McDonald",
-//         "reviewerEmail": "victoria.mcdonald@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Hazel Evans",
-//         "reviewerEmail": "hazel.evans@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Zoe Bennett",
-//         "reviewerEmail": "zoe.bennett@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "30 days return policy",
-//     "minimumOrderQuantity": 46,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "4874727824518",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/thumbnail.webp"
-//   },
-//   {
-//     "id": 21,
-//     "title": "Cucumber",
-//     "description": "Crisp and hydrating cucumbers, ideal for salads, snacks, or as a refreshing side.",
-//     "category": "groceries",
-//     "price": 1.49,
-//     "discountPercentage": 0.16,
-//     "rating": 4.07,
-//     "stock": 84,
-//     "tags": [
-//       "vegetables"
-//     ],
-//     "sku": "GRO-BRD-CUC-021",
-//     "weight": 4,
-//     "dimensions": {
-//       "width": 12.8,
-//       "height": 28.38,
-//       "depth": 21.34
-//     },
-//     "warrantyInformation": "2 year warranty",
-//     "shippingInformation": "Ships in 1-2 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Lincoln Kelly",
-//         "reviewerEmail": "lincoln.kelly@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Great value for money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Savannah Gomez",
-//         "reviewerEmail": "savannah.gomez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "James Davis",
-//         "reviewerEmail": "james.davis@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 2,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "5300066378225",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cucumber/thumbnail.webp"
-//   },
-//   {
-//     "id": 22,
-//     "title": "Dog Food",
-//     "description": "Specially formulated dog food designed to provide essential nutrients for your canine companion.",
-//     "category": "groceries",
-//     "price": 10.99,
-//     "discountPercentage": 10.27,
-//     "rating": 4.55,
-//     "stock": 71,
-//     "tags": [
-//       "pet supplies",
-//       "dog food"
-//     ],
-//     "sku": "GRO-BRD-FOO-022",
-//     "weight": 10,
-//     "dimensions": {
-//       "width": 16.93,
-//       "height": 27.15,
-//       "depth": 9.29
-//     },
-//     "warrantyInformation": "No warranty",
-//     "shippingInformation": "Ships in 1-2 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nicholas Edwards",
-//         "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Awesome product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Zachary Lee",
-//         "reviewerEmail": "zachary.lee@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nova Cooper",
-//         "reviewerEmail": "nova.cooper@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "60 days return policy",
-//     "minimumOrderQuantity": 43,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "5906686116469",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/dog-food/thumbnail.webp"
-//   },
-//   {
-//     "id": 23,
-//     "title": "Eggs",
-//     "description": "Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",
-//     "category": "groceries",
-//     "price": 2.99,
-//     "discountPercentage": 11.05,
-//     "rating": 2.53,
-//     "stock": 9,
-//     "tags": [
-//       "dairy"
-//     ],
-//     "sku": "GRO-BRD-EGG-023",
-//     "weight": 2,
-//     "dimensions": {
-//       "width": 11.42,
-//       "height": 7.44,
-//       "depth": 16.95
-//     },
-//     "warrantyInformation": "1 week warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 3,
-//         "comment": "Disappointing product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Penelope King",
-//         "reviewerEmail": "penelope.king@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Poor quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Eleanor Tyler",
-//         "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Very pleased!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Benjamin Foster",
-//         "reviewerEmail": "benjamin.foster@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 32,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "3478638588469",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/eggs/thumbnail.webp"
-//   },
-//   {
-//     "id": 24,
-//     "title": "Fish Steak",
-//     "description": "Quality fish steak, suitable for grilling, baking, or pan-searing.",
-//     "category": "groceries",
-//     "price": 14.99,
-//     "discountPercentage": 4.23,
-//     "rating": 3.78,
-//     "stock": 74,
-//     "tags": [
-//       "seafood"
-//     ],
-//     "sku": "GRO-BRD-FIS-024",
-//     "weight": 6,
-//     "dimensions": {
-//       "width": 14.95,
-//       "height": 26.31,
-//       "depth": 11.27
-//     },
-//     "warrantyInformation": "1 month warranty",
-//     "shippingInformation": "Ships in 3-5 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 2,
-//         "comment": "Would not buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Caleb Perkins",
-//         "reviewerEmail": "caleb.perkins@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Isabella Jackson",
-//         "reviewerEmail": "isabella.jackson@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Great value for money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nathan Dixon",
-//         "reviewerEmail": "nathan.dixon@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "60 days return policy",
-//     "minimumOrderQuantity": 50,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "9595036192098",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/fish-steak/thumbnail.webp"
-//   },
-//   {
-//     "id": 25,
-//     "title": "Green Bell Pepper",
-//     "description": "Fresh and vibrant green bell pepper, perfect for adding color and flavor to your dishes.",
-//     "category": "groceries",
-//     "price": 1.29,
-//     "discountPercentage": 0.16,
-//     "rating": 3.25,
-//     "stock": 33,
-//     "tags": [
-//       "vegetables"
-//     ],
-//     "sku": "GRO-BRD-GRE-025",
-//     "weight": 2,
-//     "dimensions": {
-//       "width": 15.33,
-//       "height": 26.65,
-//       "depth": 14.44
-//     },
-//     "warrantyInformation": "1 month warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Highly recommended!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Avery Carter",
-//         "reviewerEmail": "avery.carter@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Would not recommend!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Henry Hill",
-//         "reviewerEmail": "henry.hill@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Addison Wright",
-//         "reviewerEmail": "addison.wright@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "30 days return policy",
-//     "minimumOrderQuantity": 12,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "2365227493323",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/thumbnail.webp"
-//   },
-//   {
-//     "id": 26,
-//     "title": "Green Chili Pepper",
-//     "description": "Spicy green chili pepper, ideal for adding heat to your favorite recipes.",
-//     "category": "groceries",
-//     "price": 0.99,
-//     "discountPercentage": 1,
-//     "rating": 3.66,
-//     "stock": 3,
-//     "tags": [
-//       "vegetables"
-//     ],
-//     "sku": "GRO-BRD-GRE-026",
-//     "weight": 7,
-//     "dimensions": {
-//       "width": 15.38,
-//       "height": 18.12,
-//       "depth": 19.92
-//     },
-//     "warrantyInformation": "2 year warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "Low Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Great product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Luna Russell",
-//         "reviewerEmail": "luna.russell@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 1,
-//         "comment": "Waste of money!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Noah Lewis",
-//         "reviewerEmail": "noah.lewis@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 3,
-//         "comment": "Very disappointed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Clara Berry",
-//         "reviewerEmail": "clara.berry@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "30 days return policy",
-//     "minimumOrderQuantity": 39,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "9335000538563",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/thumbnail.webp"
-//   },
-//   {
-//     "id": 27,
-//     "title": "Honey Jar",
-//     "description": "Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",
-//     "category": "groceries",
-//     "price": 6.99,
-//     "discountPercentage": 14.4,
-//     "rating": 3.97,
-//     "stock": 34,
-//     "tags": [
-//       "condiments"
-//     ],
-//     "sku": "GRO-BRD-HON-027",
-//     "weight": 2,
-//     "dimensions": {
-//       "width": 9.28,
-//       "height": 21.72,
-//       "depth": 17.74
-//     },
-//     "warrantyInformation": "1 month warranty",
-//     "shippingInformation": "Ships in 1-2 business days",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 1,
-//         "comment": "Very disappointed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Autumn Gomez",
-//         "reviewerEmail": "autumn.gomez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Benjamin Wilson",
-//         "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Very disappointed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nicholas Edwards",
-//         "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "90 days return policy",
-//     "minimumOrderQuantity": 47,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "6354306346329",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/honey-jar/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/honey-jar/thumbnail.webp"
-//   },
-//   {
-//     "id": 28,
-//     "title": "Ice Cream",
-//     "description": "Creamy and delicious ice cream, available in various flavors for a delightful treat.",
-//     "category": "groceries",
-//     "price": 5.49,
-//     "discountPercentage": 8.69,
-//     "rating": 3.39,
-//     "stock": 27,
-//     "tags": [
-//       "desserts"
-//     ],
-//     "sku": "GRO-BRD-CRE-028",
-//     "weight": 1,
-//     "dimensions": {
-//       "width": 14.83,
-//       "height": 15.07,
-//       "depth": 24.2
-//     },
-//     "warrantyInformation": "1 month warranty",
-//     "shippingInformation": "Ships in 2 weeks",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Very pleased!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Elijah Cruz",
-//         "reviewerEmail": "elijah.cruz@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Jace Smith",
-//         "reviewerEmail": "jace.smith@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Highly impressed!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Sadie Morales",
-//         "reviewerEmail": "sadie.morales@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 42,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "0788954559076",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/ice-cream/1.webp",
-//       "https://cdn.dummyjson.com/product-images/groceries/ice-cream/2.webp",
-//       "https://cdn.dummyjson.com/product-images/groceries/ice-cream/3.webp",
-//       "https://cdn.dummyjson.com/product-images/groceries/ice-cream/4.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/ice-cream/thumbnail.webp"
-//   },
-//   {
-//     "id": 29,
-//     "title": "Juice",
-//     "description": "Refreshing fruit juice, packed with vitamins and great for staying hydrated.",
-//     "category": "groceries",
-//     "price": 3.99,
-//     "discountPercentage": 12.06,
-//     "rating": 3.94,
-//     "stock": 50,
-//     "tags": [
-//       "beverages"
-//     ],
-//     "sku": "GRO-BRD-JUI-029",
-//     "weight": 1,
-//     "dimensions": {
-//       "width": 18.56,
-//       "height": 21.46,
-//       "depth": 28.02
-//     },
-//     "warrantyInformation": "6 months warranty",
-//     "shippingInformation": "Ships in 1 week",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 5,
-//         "comment": "Excellent quality!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nolan Gonzalez",
-//         "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Would buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Bella Grant",
-//         "reviewerEmail": "bella.grant@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 5,
-//         "comment": "Awesome product!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Aria Flores",
-//         "reviewerEmail": "aria.flores@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "No return policy",
-//     "minimumOrderQuantity": 25,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "6936112580956",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/juice/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/juice/thumbnail.webp"
-//   },
-//   {
-//     "id": 30,
-//     "title": "Kiwi",
-//     "description": "Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",
-//     "category": "groceries",
-//     "price": 2.49,
-//     "discountPercentage": 15.22,
-//     "rating": 4.93,
-//     "stock": 99,
-//     "tags": [
-//       "fruits"
-//     ],
-//     "sku": "GRO-BRD-KIW-030",
-//     "weight": 5,
-//     "dimensions": {
-//       "width": 19.4,
-//       "height": 18.67,
-//       "depth": 17.13
-//     },
-//     "warrantyInformation": "6 months warranty",
-//     "shippingInformation": "Ships overnight",
-//     "availabilityStatus": "In Stock",
-//     "reviews": [
-//       {
-//         "rating": 4,
-//         "comment": "Highly recommended!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Emily Brown",
-//         "reviewerEmail": "emily.brown@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 2,
-//         "comment": "Would not buy again!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Jackson Morales",
-//         "reviewerEmail": "jackson.morales@x.dummyjson.com"
-//       },
-//       {
-//         "rating": 4,
-//         "comment": "Fast shipping!",
-//         "date": "2025-04-30T09:41:02.053Z",
-//         "reviewerName": "Nora Russell",
-//         "reviewerEmail": "nora.russell@x.dummyjson.com"
-//       }
-//     ],
-//     "returnPolicy": "7 days return policy",
-//     "minimumOrderQuantity": 30,
-//     "meta": {
-//       "createdAt": "2025-04-30T09:41:02.053Z",
-//       "updatedAt": "2025-04-30T09:41:02.053Z",
-//       "barcode": "2530169917252",
-//       "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
-//     },
-//     "images": [
-//       "https://cdn.dummyjson.com/product-images/groceries/kiwi/1.webp"
-//     ],
-//     "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/kiwi/thumbnail.webp"
-//   }
-// ]
-
-
-//Filter Dummy
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  StarIcon,
+} from '@heroicons/react/20/solid';
+import { Link } from 'react-router-dom';
+import {
+  ChevronDownIcon,
+  FunnelIcon,
+  MinusIcon,
+  PlusIcon,
+  Squares2X2Icon,
+} from '@heroicons/react/20/solid';
+import { fetchAllProductsAsync, fetchProductsByFiltersAsync, selectAllProducts } from '../productListSlice';
 
 const sortOptions = [
-  { name: 'Most Popular', href: '#', current: true },
-  { name: 'Best Rating', href: '#', current: false },
-  { name: 'Newest', href: '#', current: false },
-  { name: 'Price: Low to High', href: '#', current: false },
-  { name: 'Price: High to Low', href: '#', current: false },
-]
-const subCategories = [
-  { name: 'Totes', href: '#' },
-  { name: 'Backpacks', href: '#' },
-  { name: 'Travel Bags', href: '#' },
-  { name: 'Hip Bags', href: '#' },
-  { name: 'Laptop Sleeves', href: '#' },
-]
+  { name: 'Best Rating', sort: 'rating', order: 'desc', current: false },
+  { name: 'Price: Low to High', sort: 'price', order: 'asc', current: false },
+  { name: 'Price: High to Low', sort: 'price', order: 'desc', current: false },
+];
+
 const filters = [
   {
     id: 'brands',
@@ -1904,389 +52,417 @@ const filters = [
       { value: 'fragrances', label: 'fragrances', checked: false },
       { value: 'furniture', label: 'furniture', checked: true },
       { value: 'groceries', label: 'groceries', checked: false },
-  
+
     ],
   },
-  
-]
 
-//Pagination
-const items = [
-  { id: 1, title: 'Back End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
-  { id: 2, title: 'Front End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
-  { id: 3, title: 'User Interface Designer', department: 'Design', type: 'Full-time', location: 'Remote' },
 ]
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(' ');
 }
 
-const ProductList = () => {
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const product = useSelector(selectAllProducts);
+export default function ProductList() {
   const dispatch = useDispatch();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const products = useSelector(selectAllProducts);
+  const [filter, setFilter] = useState({});
+
+  const handleFilter = (e, section, option) => {
+    //section defines whether its category or brand
+    //option means selected value in filter
+    
+    const newFilter = { ...filter, [section.id]: option.value };
+    setFilter(newFilter);
+    dispatch(fetchProductsByFiltersAsync(newFilter));
+    console.log(section.id, option.value);
+  };
+
+  const handleSort = (e, option) => {
+    const newFilter = { ...filter, _sort: option.sort, _order: option.order };
+    setFilter(newFilter);
+    dispatch(fetchProductsByFiltersAsync(newFilter));
+  };
 
   useEffect(() => {
-      dispatch(fetchAllProductsAsync())
-  }, [dispatch])
-
+    dispatch(fetchAllProductsAsync());
+  }, [dispatch]);
 
   return (
-    <>
-
-      <div className="bg-white">
-        <div>
-          {/* Mobile filter dialog */}
-          <Dialog open={mobileFiltersOpen} onClose={setMobileFiltersOpen} className="relative z-40 lg:hidden">
-            <DialogBackdrop
-              transition
-              className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
-            />
+    <div className="bg-white">
+      <div>
+        {/* Mobile filter dialog */}
+        <Transition.Root show={mobileFiltersOpen} as={Fragment}>
+          <Dialog
+            as="div"
+            className="relative z-40 lg:hidden"
+            onClose={setMobileFiltersOpen}
+          >
+            <Transition.Child
+              as={Fragment}
+              enter="transition-opacity ease-linear duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity ease-linear duration-300"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-black bg-opacity-25" />
+            </Transition.Child>
 
             <div className="fixed inset-0 z-40 flex">
-              <DialogPanel
-                transition
-                className="relative ml-auto flex size-full max-w-xs transform flex-col overflow-y-auto bg-white pt-4 pb-6 shadow-xl transition duration-300 ease-in-out data-closed:translate-x-full"
+              <Transition.Child
+                as={Fragment}
+                enter="transition ease-in-out duration-300 transform"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
+                leave="transition ease-in-out duration-300 transform"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
               >
-                <div className="flex items-center justify-between px-4">
-                  <h2 className="text-lg font-medium text-gray-900">Filters</h2>
-                  <button
-                    type="button"
-                    onClick={() => setMobileFiltersOpen(false)}
-                    className="relative -mr-2 flex size-10 items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  >
-                    <span className="absolute -inset-0.5" />
-                    <span className="sr-only">Close menu</span>
-                    <XMarkIcon aria-hidden="true" className="size-6" />
-                  </button>
-                </div>
+                <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl">
+                  <div className="flex items-center justify-between px-4">
+                    <h2 className="text-lg font-medium text-gray-900">
+                      Filters
+                    </h2>
+                    <button
+                      type="button"
+                      className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md bg-white p-2 text-gray-400"
+                      onClick={() => setMobileFiltersOpen(false)}
+                    >
+                      <span className="sr-only">Close menu</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                  </div>
 
-                {/* Filters */}
-                <form className="mt-4 border-t border-gray-200">
-                  {/* <h3 className="sr-only">Categories</h3>
-                  <ul role="list" className="px-2 py-3 font-medium text-gray-900">
-                    {subCategories.map((category) => (
-                      <li key={category.name}>
-                        <a href={category.href} className="block px-2 py-3">
-                          {category.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul> */}
-
-                  {filters.map((section) => (
-                    <Disclosure key={section.id} as="div" className="border-t border-gray-200 px-4 py-6">
-                      <h3 className="-mx-2 -my-3 flow-root">
-                        <DisclosureButton className="group flex w-full items-center justify-between bg-white px-2 py-3 text-gray-400 hover:text-gray-500">
-                          <span className="font-medium text-gray-900">{section.name}</span>
-                          <span className="ml-6 flex items-center">
-                            <PlusIcon aria-hidden="true" className="size-5 group-data-open:hidden" />
-                            <MinusIcon aria-hidden="true" className="size-5 group-not-data-open:hidden" />
-                          </span>
-                        </DisclosureButton>
-                      </h3>
-                      <DisclosurePanel className="pt-6">
-                        <div className="space-y-6">
-                          {section.options.map((option, optionIdx) => (
-                            <div key={option.value} className="flex gap-3">
-                              <div className="flex h-5 shrink-0 items-center">
-                                <div className="group grid size-4 grid-cols-1">
-                                  <input
-                                    defaultValue={option.value}
-                                    id={`filter-mobile-${section.id}-${optionIdx}`}
-                                    name={`${section.id}[]`}
-                                    type="checkbox"
-                                    onChange={e=>console.log(e)}
-                                    className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                                  />
-                                  <svg
-                                    fill="none"
-                                    viewBox="0 0 14 14"
-                                    className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25"
+                  {/* Filters */}
+                  <form className="mt-4 border-t border-gray-200">
+                    {filters.map((section) => (
+                      <Disclosure
+                        as="div"
+                        key={section.id}
+                        className="border-t border-gray-200 px-4 py-6"
+                      >
+                        {({ open }) => (
+                          <>
+                            <h3 className="-mx-2 -my-3 flow-root">
+                              <Disclosure.Button className="flex w-full items-center justify-between bg-white px-2 py-3 text-gray-400 hover:text-gray-500">
+                                <span className="font-medium text-gray-900">
+                                  {section.name}
+                                </span>
+                                <span className="ml-6 flex items-center">
+                                  {open ? (
+                                    <MinusIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <PlusIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                </span>
+                              </Disclosure.Button>
+                            </h3>
+                            <Disclosure.Panel className="pt-6">
+                              <div className="space-y-6">
+                                {section.options.map((option, optionIdx) => (
+                                  <div
+                                    key={option.value}
+                                    className="flex items-center"
                                   >
-                                    <path
-                                      d="M3 8L6 11L11 3.5"
-                                      strokeWidth={2}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      className="opacity-0 group-has-checked:opacity-100"
+                                    <input
+                                      id={`filter-mobile-${section.id}-${optionIdx}`}
+                                      name={`${section.id}[]`}
+                                      defaultValue={option.value}
+                                      type="checkbox"
+                                      defaultChecked={option.checked}
+                                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
-                                    <path
-                                      d="M3 7H11"
-                                      strokeWidth={2}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      className="opacity-0 group-has-indeterminate:opacity-100"
-                                    />
-                                  </svg>
-                                </div>
+                                    <label
+                                      htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
+                                      className="ml-3 min-w-0 flex-1 text-gray-500"
+                                    >
+                                      {option.label}
+                                    </label>
+                                  </div>
+                                ))}
                               </div>
-                              <label
-                                htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
-                                className="min-w-0 flex-1 text-gray-500"
-                              >
-                                {option.label}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </DisclosurePanel>
-                    </Disclosure>
-                  ))}
-                </form>
-              </DialogPanel>
+                            </Disclosure.Panel>
+                          </>
+                        )}
+                      </Disclosure>
+                    ))}
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </Dialog>
+        </Transition.Root>
 
-          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-baseline justify-between border-b border-gray-200 pt-24 pb-6">
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900">All Products</h1>
+        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+              All Products
+            </h1>
 
-              <div className="flex items-center">
-                <Menu as="div" className="relative inline-block text-left">
-                  <MenuButton className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
+            <div className="flex items-center">
+              <Menu as="div" className="relative inline-block text-left">
+                <div>
+                  <Menu.Button className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
                     Sort
                     <ChevronDownIcon
+                      className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
-                      className="-mr-1 ml-1 size-5 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
-                  </MenuButton>
+                  </Menu.Button>
+                </div>
 
-                  <MenuItems
-                    transition
-                    className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                  >
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="py-1">
                       {sortOptions.map((option) => (
-                        <MenuItem key={option.name}>
-                          <a
-                            href={option.href}
-                            className={classNames(
-                              option.current ? 'font-medium text-gray-900' : 'text-gray-500',
-                              'block px-4 py-2 text-sm data-focus:bg-gray-100 data-focus:outline-hidden',
-                            )}
-                          >
-                            {option.name}
-                          </a>
-                        </MenuItem>
+                        <Menu.Item key={option.name}>
+                          {({ active }) => (
+                            <p
+                              onClick={e => handleSort(e, option)}
+                              className={classNames(
+                                option.current
+                                  ? 'font-medium text-gray-900'
+                                  : 'text-gray-500',
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-sm'
+                              )}
+                            >
+                              {option.name}
+                            </p>
+                          )}
+                        </Menu.Item>
                       ))}
                     </div>
                   </MenuItems>
-                </Menu>
+                </Transition>
+              </Menu>
 
-                <button type="button" className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7">
-                  <span className="sr-only">View grid</span>
-                  <Squares2X2Icon aria-hidden="true" className="size-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMobileFiltersOpen(true)}
-                  className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"
-                >
-                  <span className="sr-only">Filters</span>
-                  <FunnelIcon aria-hidden="true" className="size-5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
+              >
+                <span className="sr-only">View grid</span>
+                <Squares2X2Icon className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"
+                onClick={() => setMobileFiltersOpen(true)}
+              >
+                <span className="sr-only">Filters</span>
+                <FunnelIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
             </div>
+          </div>
 
-            <section aria-labelledby="products-heading" className="pt-6 pb-24">
-              <h2 id="products-heading" className="sr-only">
-                Products
-              </h2>
+          <section aria-labelledby="products-heading" className="pb-24 pt-6">
+            <h2 id="products-heading" className="sr-only">
+              Products
+            </h2>
 
-              <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
-                {/* Filters */}
-                <form className="hidden lg:block">
-                  {/* <h3 className="sr-only">Categories</h3>
-                  <ul role="list" className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900">
-                    {subCategories.map((category) => (
-                      <li key={category.name}>
-                        <a href={category.href}>{category.name}</a>
-                      </li>
-                    ))}
-                  </ul> */}
-
-                  {filters.map((section) => (
-                    <Disclosure key={section.id} as="div" className="border-b border-gray-200 py-6">
-                      <h3 className="-my-3 flow-root">
-                        <DisclosureButton className="group flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
-                          <span className="font-medium text-gray-900">{section.name}</span>
-                          <span className="ml-6 flex items-center">
-                            <PlusIcon aria-hidden="true" className="size-5 group-data-open:hidden" />
-                            <MinusIcon aria-hidden="true" className="size-5 group-not-data-open:hidden" />
-                          </span>
-                        </DisclosureButton>
-                      </h3>
-                      <DisclosurePanel className="pt-6">
-                        <div className="space-y-4">
-                          {section.options.map((option, optionIdx) => (
-                            <div key={option.value} className="flex gap-3">
-                              <div className="flex h-5 shrink-0 items-center">
-                                <div className="group grid size-4 grid-cols-1">
-                                  <input
-                                    defaultValue={option.value}
-                                    defaultChecked={option.checked}
-                                    id={`filter-${section.id}-${optionIdx}`}
-                                    name={`${section.id}[]`}
-                                    type="checkbox"
-                                    className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                                  />
-                                  <svg
-                                    fill="none"
-                                    viewBox="0 0 14 14"
-                                    className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25"
-                                  >
-                                    <path
-                                      d="M3 8L6 11L11 3.5"
-                                      strokeWidth={2}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      className="opacity-0 group-has-checked:opacity-100"
-                                    />
-                                    <path
-                                      d="M3 7H11"
-                                      strokeWidth={2}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      className="opacity-0 group-has-indeterminate:opacity-100"
-                                    />
-                                  </svg>
-                                </div>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+              {/* Filters */}
+              <form className="hidden lg:block">
+                {filters.map((section) => (
+                  <Disclosure
+                    as="div"
+                    key={section.id}
+                    className="border-b border-gray-200 py-6"
+                  >
+                    {({ open }) => (
+                      <>
+                        <h3 className="-my-3 flow-root">
+                          <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                            <span className="font-medium text-gray-900">
+                              {section.name}
+                            </span>
+                            <span className="ml-6 flex items-center">
+                              {open ? (
+                                <MinusIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <PlusIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </span>
+                          </Disclosure.Button>
+                        </h3>
+                        <Disclosure.Panel className="pt-6">
+                          <div className="space-y-4">
+                            {section.options.map((option, optionIdx) => (
+                              <div
+                                key={option.value}
+                                className="flex items-center"
+                              >
+                                <input
+                                  id={`filter-${section.id}-${optionIdx}`}
+                                  name={`${section.id}[]`}
+                                  defaultValue={option.value}
+                                  type="checkbox"
+                                  defaultChecked={option.checked}
+                                  onChange={(e) =>
+                                    handleFilter(e, section, option)
+                                  }
+                                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <label
+                                  htmlFor={`filter-${section.id}-${optionIdx}`}
+                                  className="ml-3 text-sm text-gray-600"
+                                >
+                                  {option.label}
+                                </label>
                               </div>
-                              <label htmlFor={`filter-${section.id}-${optionIdx}`} className="text-sm text-gray-600">
-                                {option.label}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </DisclosurePanel>
-                    </Disclosure>
-                  ))}
-                </form>
+                            ))}
+                          </div>
+                        </Disclosure.Panel>
+                      </>
+                    )}
+                  </Disclosure>
+                ))}
+              </form>
 
-                {/* Product grid */}
-                <div className="lg:col-span-3">
-                  {/* Product Data */}
-                  <div className="bg-white">
-                    <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
-                      {/* <h2 className="text-2xl font-bold tracking-tight text-gray-900">Customers also purchased</h2> */}
-
-                      <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                        {product.map((product) => (
-                          <Link to={`/product-detail`}>
-                            <div key={product.id} className="group relative border-solid border-2 border-gray-200 p-2">
+              {/* Product grid */}
+              <div className="lg:col-span-3">
+                {/* This is our products list  */}
+                <div className="bg-white">
+                  <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
+                    <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+                      {products.map((product) => (
+                        <Link to="/product-detail" key={product.id}>
+                          <div className="group relative border-solid border-2 p-2 border-gray-200">
+                            <div className="min-h-60 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
                               <img
-                                alt={product.title}
                                 src={product.thumbnail}
-                                className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-60"
+                                alt={product.title}
+                                className="h-full w-full object-cover object-center lg:h-full lg:w-full"
                               />
-                              <div className="mt-4 flex justify-between">
-                                <div>
-                                  <h3 className="text-sm text-gray-700">
-                                    <a href={product.thumbnail}>
-                                      <span aria-hidden="true" className="absolute inset-0" />
-                                      {product.title}
-                                    </a>
-                                  </h3>
-                                  <p className="mt-1 text-sm text-gray-500">
-                                    <StarIcon className='w-6 h-6 inline ' />
-                                    <span className='align-bottom'>{product.rating}</span>
+                            </div>
+                            <div className="mt-4 flex justify-between">
+                              <div>
+                                <h3 className="text-sm text-gray-700">
+                                  <p href={product.thumbnail}>
+                                    <span
+                                      aria-hidden="true"
+                                      className="absolute inset-0"
+                                    />
+                                    {product.title}
                                   </p>
-                                </div>
-
-                                <div className=''>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    ${Math.round(product.price * (1 - product.discountPercentage / 100))}
-                                  </p>
-                                  <p className="text-sm line-through font-medium text-gray-400">${product.price}</p>
-
-                                </div>
-
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  <StarIcon className="w-6 h-6 inline"></StarIcon>
+                                  <span className=" align-bottom">
+                                    {product.rating}
+                                  </span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm block font-medium text-gray-900">
+                                  $
+                                  {Math.round(
+                                    product.price *
+                                    (1 - product.discountPercentage / 100)
+                                  )}
+                                </p>
+                                <p className="text-sm block line-through font-medium text-gray-400">
+                                  ${product.price}
+                                </p>
                               </div>
                             </div>
-                          </Link>
-                        ))}
-                      </div>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 </div>
-
-
               </div>
-            </section>
-            {/* section of product and filter ends here */}
-            {/* Pagination */}
-            <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-              <div className="flex flex-1 justify-between sm:hidden">
-                <a
-                  href="#"
-                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Previous
-                </a>
-                <a
-                  href="#"
-                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Next
-                </a>
-              </div>
-              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{' '}
-                    <span className="font-medium">97</span> results
-                  </p>
-                </div>
-                <div>
-                  <nav aria-label="Pagination" className="isolate inline-flex -space-x-px rounded-md shadow-xs">
-                    <a
-                      href="#"
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 inset-ring inset-ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                    >
-                      <span className="sr-only">Previous</span>
-                      <ChevronLeftIcon aria-hidden="true" className="size-5" />
-                    </a>
-                    {/* Current: "z-10 bg-indigo-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600", Default: "text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" */}
-                    <a
-                      href="#"
-                      aria-current="page"
-                      className="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                      1
-                    </a>
-                    <a
-                      href="#"
-                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                    >
-                      2
-                    </a>
-                    <a
-                      href="#"
-                      className="relative hidden items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 md:inline-flex"
-                    >
-                      3
-                    </a>
+              {/* Product grid end */}
+            </div>
+          </section>
 
-                    <a
-                      href="#"
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 inset-ring inset-ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                    >
-                      <span className="sr-only">Next</span>
-                      <ChevronRightIcon aria-hidden="true" className="size-5" />
-                    </a>
-                  </nav>
-                </div>
+          {/* section of product and filters ends */}
+          <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <a
+                href="#"
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </a>
+              <a
+                href="#"
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </a>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">1</span> to{' '}
+                  <span className="font-medium">10</span> of{' '}
+                  <span className="font-medium">97</span> results
+                </p>
+              </div>
+              <div>
+                <nav
+                  className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                  aria-label="Pagination"
+                >
+                  <a
+                    href="#"
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                  </a>
+                  {/* Current: "z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600", Default: "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" */}
+                  <a
+                    href="#"
+                    aria-current="page"
+                    className="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    1
+                  </a>
+                  <a
+                    href="#"
+                    className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    2
+                  </a>
+
+                  <a
+                    href="#"
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                  </a>
+                </nav>
               </div>
             </div>
-
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
-
-
-    </>
-  )
+    </div>
+  );
 }
-
-export default ProductList
