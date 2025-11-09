@@ -1,11 +1,12 @@
 import React from 'react'
-import ProductDetail from '../features/product-list/components/productDetail'
+import ProductDetail from '../features/product/components/productDetail'
+import NavBar from '../features/navbar/NavBar'
 
 const ProductDetailPage = () => {
   return (
-    <div>
+    <NavBar>
       <ProductDetail/>
-    </div>
+    </NavBar>
   )
 }
 
